@@ -11,10 +11,12 @@ class Bloom;
 class BloomInstance;
 class BloomSlice;
 
+#define TRANSITION_PERIOD_SECONDS 7*24*3600
+
 // Bloom
 class Bloom {
 public:
-    Bloom(int entries, int err_mode, int err_deno);
+    Bloom(int entries, int err_mode, int err_deno, int slice_num = 2);
     ~Bloom();
 
     // 初始化（新创建 / pb重建）
@@ -24,14 +26,14 @@ public:
     bool Add(string& key);
     bool Test(string& key);
 
-private:
-    BloomInstance* AddBloomInstance(int entries, int err_mode, int err_deno, int ins_num = 2, int slice_num = 2);
-    bool RemBloomInstance(int idx);
+    bool GetParams(int& entries, int& err_mode, int& err_deno, int& slice_num);
+
+    // 容量、错误率调整时新建布隆实例
+    BloomInstance* NewBloomInstance(int entries, int err_mode, int err_deno, int slice_num);
 
 private:
-    // 新旧两个布隆实例 （instance0过渡期后作废）
-    BloomInstance* m_instance;
-    BloomInstance* m_instance0;
+    // 多个布隆实例 （过渡期后只保留最新示例，其余作废）
+    vector<BloomInstance*> m_instances;
 
     // 过渡期时长 （单位秒）
     uint32_t m_trans_period;
@@ -49,6 +51,11 @@ public:
     bool Test(string& key);
     bool Full();
 
+    int GetEntries() { return m_entries; }
+    int GetErrMode() { return m_err_mode; }
+    int GetErrDeno() { return m_err_deno; }
+    int GetSliceNum() { return m_slice_num; }
+
 private:
     BloomSlice* addSlice();
     BloomSlice* addSlice(vector<uint32_t>);
@@ -63,6 +70,8 @@ private:
     // 每块slice错误率为(m_err_mode/m_err_deno) * (1/m_slice_num)
     // 每块slice各存储(m_entries / m_slice_num)
     vector<BloomSlice*> m_slices; 
+
+    uint32_t m_create_time;
 };
 
 // BloomSlice

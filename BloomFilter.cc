@@ -18,7 +18,12 @@
 
 //==============================================================================
 // Bloom
-Bloom::Bloom(int entries, int err_mode, int err_deno) {
+Bloom::Bloom(int entries, int err_mode, int err_deno, int slice_num) {
+
+    m_trans_period = TRANSITION_PERIOD_SECONDS;
+
+    BloomInstance* instance = new BloomInstance(entries, err_mode, err_deno, slice_num);
+    m_instances.push_back(instance);
 }
 
 Bloom::~Bloom() {
@@ -30,9 +35,43 @@ Bloom* InitBloom(string& pb) {
 }
 
 bool Bloom::Add(string& key) {
+
+    if(m_instances.size() == 0) {
+        return false;
+    }
+    BloomInstance* instance = *(m_instances.rbegin());
+    return instance->Add(key);
 }
 
 bool Bloom::Test(string& key) {
+
+    for (auto it = m_instances.begin(); it != m_instances.end(); it++) {
+        BloomInstance* instance = *it;
+        if (instance->Test(key)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Bloom::GetParams(int& entries, int& err_mode, int& err_deno, int& slice_num) {
+
+    if(m_instances.size() == 0) {
+        return false;
+    }
+    BloomInstance* instance = *(m_instances.rbegin());
+
+    entries = instance->GetEntries();
+    err_mode = instance->GetErrMode();
+    err_deno = instance->GetErrDeno();
+    slice_num = instance->GetSliceNum();
+}
+
+BloomInstance* Bloom::NewBloomInstance(int entries, int err_mode, int err_deno, int slice_num) {
+    m_trans_period = TRANSITION_PERIOD_SECONDS;
+    
+    BloomInstance* instance = new BloomInstance(entries, err_mode, err_deno, slice_num);
+    m_instances.push_back(instance);
 }
 
 //==============================================================================
@@ -47,6 +86,8 @@ BloomInstance::BloomInstance(int entries, int err_mode, int err_deno, int slice_
         BloomSlice* slice = new BloomSlice(avg_entries, avg_error);
         m_slices.push_back(slice);
     }
+
+    m_create_time = time(NULL);
 }
 
 BloomInstance::~BloomInstance() {
@@ -61,9 +102,9 @@ bool BloomInstance::InitInstance(string& pb) {
 }
 
 bool BloomInstance::Add(string& key) {
+
     for (auto it = m_slices.begin(); it != m_slices.end(); it++) {
         BloomSlice* slice = *it;
-        
         if (!slice->Full()) {
             if(slice->Add(key)) {
                 return true;
@@ -72,7 +113,6 @@ bool BloomInstance::Add(string& key) {
             }
         } 
     }
-
     return false;
 }
 
