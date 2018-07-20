@@ -31,6 +31,10 @@ public:
     // 容量、错误率调整时新建布隆实例
     BloomInstance* NewBloomInstance(int entries, int err_mode, int err_deno, int slice_num);
 
+    // 串行化、反串行化
+    bool Serialize(string& toString);
+    bool DeSerialize(string& fromString, Bloom** bloom);
+
 private:
     // 多个布隆实例 （过渡期后只保留最新示例，其余作废）
     vector<BloomInstance*> m_instances;

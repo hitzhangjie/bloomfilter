@@ -10,7 +10,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "BloomFilter.h"
+#include "Bloom.h"
 #include "murmurhash2.h"
 
 #define MAKESTRING(n) STRING(n)
@@ -72,6 +72,14 @@ BloomInstance* Bloom::NewBloomInstance(int entries, int err_mode, int err_deno, 
     
     BloomInstance* instance = new BloomInstance(entries, err_mode, err_deno, slice_num);
     m_instances.push_back(instance);
+}
+
+bool Bloom::Serialize(string& toString) {
+
+}
+
+bool Bloom::DeSerialize(string& fromString, Bloom** bloom) {
+
 }
 
 //==============================================================================

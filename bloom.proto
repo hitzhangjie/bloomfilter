@@ -1,0 +1,24 @@
+package pb_bloom;
+
+// ckv key: visted_feeds_bloom_${uid}
+message Bloom {
+    repeated BloomInstance instances = 1;
+    optional uint32 trans_period = 2;
+}
+
+message BloomInstance {
+    optional uint32 entries = 1;
+    optional uint32 err_mode = 2;
+    optional uint32 err_deno = 3;
+    optional uint32 slice_num = 4;
+    repeated BloomSlice slices = 5;
+    optional uint32 create_time = 6;
+}
+
+message BloomSlice {
+    optional uint32 create_time = 1;
+    optional uint32 access_time = 2;
+    repeated uint64 data        = 3;
+    optional uint32 m_bits      = 4;
+    optional uint32 m_hashes    = 5;
+}
