@@ -207,7 +207,13 @@ bool BloomInstance::Add(string& key) {
             }
         } 
     }
-    return false;
+
+    if (Reset()) {
+        auto it = m_slices.rbegin();
+        return (*it)->Add(key);
+    } else {
+        return false;
+    }
 }
 
 bool BloomInstance::Test(string& key) {
