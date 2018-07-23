@@ -35,21 +35,21 @@ Bloom::~Bloom() {
 
 bool Bloom::InitBloom(string& pb) {
 
-    // parse from pb message...fixme!!!
     pb_bloom::Bloom pbBloom;
     if( !pbBloom.ParseFromString(pb) ) {
         fprintf(stderr, "De-Serialize pb_bloom failed\n");
         return false;
     }
 
-    Bloom* bloom = new Bloom();
-    bloom->m_trans_period = pbBloom.trans_period();
+    // Bloom attr
+    this->m_trans_period = pbBloom.trans_period();
 
-    // rebuild Bloom
+    // rebuild BloomInstance
     for (auto it = pbBloom.instances().begin(); it != pbBloom.instances().end(); it++) {
 
-        // rebuild BloomInstance
         auto instance = new BloomInstance;
+        this->m_instances.push_back(instance);
+
         instance->SetEntries(it->entries());
         instance->SetErrMode(it->err_mode());
         instance->SetErrDeno(it->err_deno());
@@ -58,7 +58,10 @@ bool Bloom::InitBloom(string& pb) {
 
         // rebuild BloomSlice
         for (auto itSlice = it->slices().begin(); itSlice != it->slices().end(); itSlice++) {
+
             auto bloomSlice = new BloomSlice();
+            instance->AddSlice(bloomSlice);
+
             bloomSlice->SetCreateTime(itSlice->create_time());
             bloomSlice->SetAccessTime(itSlice->access_time());
             bloomSlice->SetBits(itSlice->bits());
@@ -235,10 +238,6 @@ bool BloomInstance::Full() {
     }
     return true;
 }
-
-BloomSlice* BloomInstance::addSlice() { return NULL; }
-BloomSlice* BloomInstance::addSlice(vector<uint32_t> data) { return NULL; };
-bool BloomInstance::removeSlice(int idx) { return true; };
 
 //==============================================================================
 // BloomSlice

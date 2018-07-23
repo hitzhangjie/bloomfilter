@@ -70,11 +70,12 @@ public:
     void SetErrDeno(int err_deno) { m_err_deno = err_deno; }
     void SetSliceNum(int slice_num) { m_slice_num = slice_num; }
     void SetCreateTime(uint32_t create_time) { m_create_time = create_time; }
+    void AddSlice(BloomSlice* slice) { if (slice) m_slices.push_back(slice); }
 
 private:
-    BloomSlice* addSlice();
-    BloomSlice* addSlice(vector<uint32_t>);
-    bool removeSlice(int idx);
+    //BloomSlice* addSlice();
+    //BloomSlice* addSlice(vector<uint32_t>);
+    //bool removeSlice(int idx);
 
 private:
     int m_entries;              // 计划存储多少元素

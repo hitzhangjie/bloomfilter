@@ -1,5 +1,5 @@
 all: *.cc *.h
-	g++ -o main *.cc -std=c++11 -lprotobuf
+	g++ -g -o main *.cc -std=c++11 -lprotobuf
 
 .PHONY: test
 

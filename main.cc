@@ -7,17 +7,21 @@
 void BloomSliceTest();
 void BloomInstanceTest();
 void BloomTest();
+void BloomRebuild();
 
 int main(int argc, char ** argv) {
 
     //printf("BloomSlice Test:\n");
     //BloomSliceTest();
 
-    //printf("BloomInstance Test;\n");
+    //printf("BloomInstance Test:\n");
     //BloomInstanceTest();
 
-    printf("Bloom Test;\n");
-    BloomTest();
+    //printf("Bloom Test:\n");
+    //BloomTest();
+
+    printf("Bloom Rebuild:\n");
+    BloomRebuild();
 }
 
 void BloomSliceTest() {
@@ -88,6 +92,47 @@ void BloomTest() {
     }
 
     if (bloom->Test(key)) {
+        printf("hello existed\n");
+    } else {
+        printf("hello not existed\n");
+    }
+
+}
+
+void BloomRebuild() {
+
+    string key = "hello";
+
+    Bloom * bloom = new Bloom(4000, 1, 1000, 2);
+
+    if (bloom->Add(key)) {
+        printf("hello added succ\n");
+    } else {
+        printf("hello added failed\n");
+    }
+
+    if (bloom->Test(key)) {
+        printf("hello existed\n");
+    } else {
+        printf("hello not existed\n");
+    }
+
+    // test Serialize/De-Serialize
+    string buf;
+    if (bloom->SaveBloom(buf)) {
+        printf("bloom Serialize success\n");
+    } else {
+        return;
+    }
+
+    Bloom newBloom;
+    if (newBloom.InitBloom(buf)) {
+        printf("bloom De-Serialize success\n");
+    } else {
+        return;
+    }
+
+    if (newBloom.Test(key)) {
         printf("hello existed\n");
     } else {
         printf("hello not existed\n");
