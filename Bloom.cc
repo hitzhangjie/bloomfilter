@@ -142,6 +142,13 @@ bool Bloom::Test(string& key) {
     return false;
 }
 
+bool Bloom::Reset(bool global) {
+
+    // fixme!!!
+
+    return true;
+}
+
 BloomInstance* Bloom::NewBloomInstance(int entries, int err_mode, int err_deno, int slice_num) {
     m_trans_period = TRANSITION_PERIOD_SECONDS;
     

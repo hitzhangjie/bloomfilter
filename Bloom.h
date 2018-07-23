@@ -20,13 +20,14 @@ public:
     Bloom();
     ~Bloom();
 
-    bool InitBloom(string& pb);     // 从pb数据反串行化bloom
-    bool SaveBloom(string& buf);    // 将bloom串行化为pb数据
+    bool InitBloom(string& pb);         // 从pb数据反串行化bloom
+    bool SaveBloom(string& buf);        // 将bloom串行化为pb数据
 
-    bool Add(string& key);          // Add key
-    bool Test(string& key);         // Test key
+    bool Add(string& key);              // Add key
+    bool Test(string& key);             // Test key
+    bool Reset(bool global = false);    // 重置
 
-                                    // 容量、错误率调整时新建布隆实例
+                                        // 容量、错误率调整时新建布隆实例
     BloomInstance* NewBloomInstance(int entries, int err_mode, int err_deno, int slice_num);
 
 private:
