@@ -138,4 +138,36 @@ void BloomRebuild() {
         printf("hello not existed\n");
     }
 
+    string any = "any";
+    if (newBloom.Test(any)) {
+        printf("any existed\n");
+    } else {
+        printf("any not existed\n");
+    }
+
+    // test reset
+    if (newBloom.Reset(RESET_FIRST_INSTANCE_FIRST_SLICE)) {
+        printf("reset success\n");
+    } else {
+        printf("reset failed\n");
+    }
+
+    if (newBloom.Test(key)) {
+        printf("hello existed\n");
+    } else {
+        printf("hello not existed\n");
+    }
+
+    if (newBloom.Add(key)) {
+        printf("add hello success\n");
+    } else {
+        printf("add hello failed\n");
+    }
+
+    if (newBloom.Test(key)) {
+        printf("hello existed\n");
+    } else {
+        printf("hello not existed\n");
+    }
+
 }
