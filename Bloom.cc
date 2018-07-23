@@ -124,7 +124,7 @@ bool Bloom::SaveBloom(string &buf) {
 
 bool Bloom::Add(string& key) {
 
-    if(m_instances.size() == 0) {
+    if (m_instances.size() == 0) {
         return false;
     }
     BloomInstance* instance = *(m_instances.rbegin());
@@ -142,11 +142,25 @@ bool Bloom::Test(string& key) {
     return false;
 }
 
-bool Bloom::Reset(bool global) {
+bool Bloom::Reset(RESET_TYPE type) {
 
-    // fixme!!!
+    if (m_instances.size() == 0) {
+        return false;
+    }
 
-    return true;
+    if (type == RESET_FIRST_INSTANCE_FIRST_SLICE) {
+        BloomInstance* instance = *(m_instances.begin());
+
+        if (instance->Reset()) {
+            return true;
+        } else {
+            return false;
+        }
+
+    } else {
+        fprintf(stderr, "not supported RESET_TYPE\n");
+        return false;
+    }
 }
 
 BloomInstance* Bloom::NewBloomInstance(int entries, int err_mode, int err_deno, int slice_num) {
@@ -220,6 +234,24 @@ bool BloomInstance::Full() {
     return true;
 }
 
+bool BloomInstance::Reset() {
+
+    if (m_slice_num < 2) {
+        fprintf(stderr, "invalid slice_num: %d\n", m_slice_num);
+        return false;
+    }
+
+    m_slices.erase(m_slices.begin());
+
+    double avg_entries = m_entries / m_slice_num;
+    double avg_error = ((double)m_err_mode / (double)m_err_deno) / m_slice_num;
+
+    BloomSlice* slice = new BloomSlice(avg_entries, avg_error);
+    m_slices.push_back(slice);
+    
+    return true;
+}
+
 //==============================================================================
 // BloomSlice
 
@@ -245,6 +277,8 @@ BloomSlice::BloomSlice(int entries, double error) {
 
     bitset<64> bit64;
     m_data.resize(elements, bit64);
+
+    m_create_time = time(NULL);
 }
 
 BloomSlice::BloomSlice() {

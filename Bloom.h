@@ -11,6 +11,12 @@ class Bloom;
 class BloomInstance;
 class BloomSlice;
 
+enum RESET_TYPE {
+    RESET_FIRST_INSTANCE_FIRST_SLICE = 0,
+    RESET_FIRST_INSTANCE_ALL_SLICE = 1,
+    RESET_ALL_INSTANCE = 2,
+};
+
 #define TRANSITION_PERIOD_SECONDS 7*24*3600
 
 // Bloom
@@ -25,7 +31,7 @@ public:
 
     bool Add(string& key);              // Add key
     bool Test(string& key);             // Test key
-    bool Reset(bool global = false);    // 重置
+    bool Reset(RESET_TYPE type);        // 重置
 
                                         // 容量、错误率调整时新建布隆实例
     BloomInstance* NewBloomInstance(int entries, int err_mode, int err_deno, int slice_num);
@@ -60,21 +66,16 @@ public:
     void SetCreateTime(uint32_t create_time) { m_create_time = create_time; }
     void AddSlice(BloomSlice* slice) { if (slice) m_slices.push_back(slice); }
 
-private:
-    //BloomSlice* addSlice();
-    //BloomSlice* addSlice(vector<uint32_t>);
-    //bool removeSlice(int idx);
+    bool Reset();
 
 private:
-    int m_entries;              // 计划存储多少元素
-    int m_err_mode;             // 错误率分子
-    int m_err_deno;             // 错误率分母
-    int m_slice_num;            // slice数量
+    int m_entries;                  // 计划存储多少元素
+    int m_err_mode;                 // 错误率分子
+    int m_err_deno;                 // 错误率分母
+    int m_slice_num;                // slice数量
 
-    // 每块slice错误率为(m_err_mode/m_err_deno) * (1/m_slice_num)
-    // 每块slice各存储(m_entries / m_slice_num)
-    vector<BloomSlice*> m_slices; 
-
+    vector<BloomSlice*> m_slices;   // 每块slice错误率为(m_err_mode/m_err_deno) * (1/m_slice_num)
+                                    // 每块slice各存储(m_entries / m_slice_num)
     uint32_t m_create_time;
 };
 
@@ -112,4 +113,6 @@ private:
     int m_hashes;
 };
 
+
 #endif
+
