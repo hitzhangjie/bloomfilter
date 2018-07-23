@@ -19,6 +19,6 @@ message BloomSlice {
     optional uint32 create_time = 1;
     optional uint32 access_time = 2;
     repeated uint64 data        = 3;
-    optional uint32 m_bits      = 4;
-    optional uint32 m_hashes    = 5;
+    optional uint32 bits      = 4;
+    optional uint32 hashes    = 5;
 }

@@ -12,6 +12,7 @@
 
 #include "Bloom.h"
 #include "murmurhash2.h"
+#include "bloom.pb.h"
 
 #define MAKESTRING(n) STRING(n)
 #define STRING(n) #n
@@ -26,12 +27,96 @@ Bloom::Bloom(int entries, int err_mode, int err_deno, int slice_num) {
     m_instances.push_back(instance);
 }
 
+Bloom::Bloom() {
+}
+
 Bloom::~Bloom() {
 }
 
-Bloom* InitBloom(string& pb) {
+bool Bloom::InitBloom(string& pb) {
+
     // parse from pb message...fixme!!!
-    return NULL;
+    pb_bloom::Bloom pbBloom;
+    if( !pbBloom.ParseFromString(pb) ) {
+        fprintf(stderr, "De-Serialize pb_bloom failed\n");
+        return false;
+    }
+
+    Bloom* bloom = new Bloom();
+    bloom->m_trans_period = pbBloom.trans_period();
+
+    // rebuild Bloom
+    for (auto it = pbBloom.instances().begin(); it != pbBloom.instances().end(); it++) {
+
+        // rebuild BloomInstance
+        auto instance = new BloomInstance;
+        instance->SetEntries(it->entries());
+        instance->SetErrMode(it->err_mode());
+        instance->SetErrDeno(it->err_deno());
+        instance->SetSliceNum(it->slices_size());
+        instance->SetCreateTime(it->create_time());
+
+        // rebuild BloomSlice
+        for (auto itSlice = it->slices().begin(); itSlice != it->slices().end(); itSlice++) {
+            auto bloomSlice = new BloomSlice();
+            bloomSlice->SetCreateTime(itSlice->create_time());
+            bloomSlice->SetAccessTime(itSlice->access_time());
+            bloomSlice->SetBits(itSlice->bits());
+            bloomSlice->SetHashes(itSlice->hashes());
+
+            vector<bitset<64>> data;
+            for (auto itData = itSlice->data().begin(); itData != itSlice->data().end(); itData++) {
+                data.push_back(bitset<64>(*itData));
+            }
+            bloomSlice->SetData(data);
+        }
+    }
+
+    return true;
+}
+
+bool Bloom::SaveBloom(string &buf) {
+
+    pb_bloom::Bloom pbBloom;
+
+    // Bloom attr
+    pbBloom.set_trans_period(m_trans_period);
+
+    // BloomInstance
+    for (auto it = m_instances.begin(); it != m_instances.end(); it++) {
+
+        pb_bloom::BloomInstance* pbInstance = pbBloom.add_instances();
+
+        // BloomInstance attr
+        pbInstance->set_entries((*it)->GetEntries());
+        pbInstance->set_err_mode((*it)->GetErrMode());
+        pbInstance->set_err_deno((*it)->GetErrDeno());
+        pbInstance->set_slice_num((*it)->GetSliceNum());
+        pbInstance->set_create_time((*it)->GetCreateTime());
+
+        // BloomSlice data
+        vector<BloomSlice*> slices = (*it)->GetSlices();
+        for (auto itSlice = slices.begin(); itSlice != slices.end(); itSlice++) {
+            // BloomSlice attr
+            pb_bloom::BloomSlice* pbSlice = pbInstance->add_slices();
+            pbSlice->set_create_time((*itSlice)->GetCreateTime());
+            pbSlice->set_access_time((*itSlice)->GetAccessTime());
+            pbSlice->set_bits((*itSlice)->GetBits());
+            pbSlice->set_hashes((*itSlice)->GetHashes());
+            // BloomSlice data
+            vector<bitset<64>> data = (*itSlice)->GetData();
+            for (auto itData = data.begin(); itData != data.end(); itData++) {
+                pbSlice->add_data(itData->to_ullong());
+            }
+        }
+    }
+
+    if( !pbBloom.SerializeToString(&buf) ) {
+        fprintf(stderr, "pbBloom Serialize failed");
+        return false;
+    }
+
+    return true;
 }
 
 bool Bloom::Add(string& key) {
@@ -96,6 +181,9 @@ BloomInstance::BloomInstance(int entries, int err_mode, int err_deno, int slice_
     }
 
     m_create_time = time(NULL);
+}
+
+BloomInstance::BloomInstance() {
 }
 
 BloomInstance::~BloomInstance() {
@@ -177,6 +265,9 @@ BloomSlice::BloomSlice(int entries, double error) {
 
     bitset<64> bit64;
     m_data.resize(elements, bit64);
+}
+
+BloomSlice::BloomSlice() {
 }
 
 BloomSlice::~BloomSlice() {}

@@ -17,10 +17,12 @@ class BloomSlice;
 class Bloom {
 public:
     Bloom(int entries, int err_mode, int err_deno, int slice_num = 2);
+    Bloom();
     ~Bloom();
 
     // 初始化（新创建 / pb重建）
-    Bloom* InitBloom(string& pb);
+    bool InitBloom(string& pb);
+    bool SaveBloom(string& buf);
 
     // Add / Test
     bool Add(string& key);
@@ -46,7 +48,8 @@ private:
 // BloomInstance
 class BloomInstance {
 public:
-    BloomInstance(int entries = 4000, int err_mode = 1, int err_deno = 1000, int slice_num = 2);
+    BloomInstance(int entries, int err_mode, int err_deno, int slice_num = 2);
+    BloomInstance();
     ~BloomInstance();
 
     bool InitInstance(string& pb);
@@ -59,6 +62,14 @@ public:
     int GetErrMode() { return m_err_mode; }
     int GetErrDeno() { return m_err_deno; }
     int GetSliceNum() { return m_slice_num; }
+    int GetCreateTime() { return m_create_time; }
+    vector<BloomSlice*> GetSlices() { return m_slices; }
+
+    void SetEntries(int entries) { m_entries = entries; }
+    void SetErrMode(int err_mode) { m_err_mode = err_mode; }
+    void SetErrDeno(int err_deno) { m_err_deno = err_deno; }
+    void SetSliceNum(int slice_num) { m_slice_num = slice_num; }
+    void SetCreateTime(uint32_t create_time) { m_create_time = create_time; }
 
 private:
     BloomSlice* addSlice();
@@ -82,6 +93,7 @@ private:
 class BloomSlice {
 public:
     BloomSlice(int entries, double error);
+    BloomSlice();
     ~BloomSlice();
 
     bool InitSlice(string& pb);
@@ -90,13 +102,25 @@ public:
     bool Test(string& key);
     bool Full();
 
+    uint32_t GetCreateTime() { return m_create_time; }
+    uint32_t GetAccessTime() { return m_access_time; }
+    vector<bitset<64>> GetData() { return m_data; }
+    int GetBits() { return m_bits; }
+    int GetHashes() { return m_hashes; }
+
+    void SetCreateTime(uint32_t create_time) { m_create_time = create_time; }
+    void SetAccessTime(uint32_t access_time) { m_access_time = access_time; }
+    void SetData(vector<bitset<64>>& data) { m_data = data; }
+    void SetBits(int bits) { m_bits = bits; }
+    void SetHashes(int hashes) { m_hashes = hashes; }
+
 private:
     bool testOk(int pos, bool needSet = false);
 
 private:
     uint32_t m_create_time;
     uint32_t m_access_time; 
-    vector<bitset<64> > m_data;
+    vector<bitset<64>> m_data;
     int m_bits;
     int m_hashes;
 };

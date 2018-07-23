@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "BloomFilter.h"
+#include "Bloom.h"
 
 void BloomSliceTest();
 void BloomInstanceTest();
