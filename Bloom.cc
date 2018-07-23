@@ -142,32 +142,11 @@ bool Bloom::Test(string& key) {
     return false;
 }
 
-bool Bloom::GetParams(int& entries, int& err_mode, int& err_deno, int& slice_num) {
-
-    if(m_instances.size() == 0) {
-        return false;
-    }
-    BloomInstance* instance = *(m_instances.rbegin());
-
-    entries = instance->GetEntries();
-    err_mode = instance->GetErrMode();
-    err_deno = instance->GetErrDeno();
-    slice_num = instance->GetSliceNum();
-}
-
 BloomInstance* Bloom::NewBloomInstance(int entries, int err_mode, int err_deno, int slice_num) {
     m_trans_period = TRANSITION_PERIOD_SECONDS;
     
     BloomInstance* instance = new BloomInstance(entries, err_mode, err_deno, slice_num);
     m_instances.push_back(instance);
-}
-
-bool Bloom::Serialize(string& toString) {
-
-}
-
-bool Bloom::DeSerialize(string& fromString, Bloom** bloom) {
-
 }
 
 //==============================================================================
@@ -193,11 +172,6 @@ BloomInstance::~BloomInstance() {
     for (auto it = m_slices.begin(); it != m_slices.end(); it++) {
         delete *it;
     }
-}
-
-bool BloomInstance::InitInstance(string& pb) {
-    // parse from pb message...fixme!!!
-    return true;
 }
 
 bool BloomInstance::Add(string& key) {
@@ -270,13 +244,6 @@ BloomSlice::BloomSlice() {
 }
 
 BloomSlice::~BloomSlice() {}
-
-bool BloomSlice::InitSlice(string& pb) {
-
-    // parse from pb message BloomSlice, fixme!!!
-
-    return true;
-}
 
 // if add success return true, or return false
 bool BloomSlice::Add(string& key) {

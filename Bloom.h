@@ -20,29 +20,18 @@ public:
     Bloom();
     ~Bloom();
 
-    // 初始化（新创建 / pb重建）
-    bool InitBloom(string& pb);
-    bool SaveBloom(string& buf);
+    bool InitBloom(string& pb);     // 从pb数据反串行化bloom
+    bool SaveBloom(string& buf);    // 将bloom串行化为pb数据
 
-    // Add / Test
-    bool Add(string& key);
-    bool Test(string& key);
+    bool Add(string& key);          // Add key
+    bool Test(string& key);         // Test key
 
-    bool GetParams(int& entries, int& err_mode, int& err_deno, int& slice_num);
-
-    // 容量、错误率调整时新建布隆实例
+                                    // 容量、错误率调整时新建布隆实例
     BloomInstance* NewBloomInstance(int entries, int err_mode, int err_deno, int slice_num);
 
-    // 串行化、反串行化
-    bool Serialize(string& toString);
-    bool DeSerialize(string& fromString, Bloom** bloom);
-
 private:
-    // 多个布隆实例 （过渡期后只保留最新示例，其余作废）
-    vector<BloomInstance*> m_instances;
-
-    // 过渡期时长 （单位秒）
-    uint32_t m_trans_period;
+    vector<BloomInstance*> m_instances;     // 多个布隆过滤器实例
+    uint32_t m_trans_period;                // 过渡期时长，单位"秒"
 };
 
 // BloomInstance
@@ -51,8 +40,6 @@ public:
     BloomInstance(int entries, int err_mode, int err_deno, int slice_num = 2);
     BloomInstance();
     ~BloomInstance();
-
-    bool InitInstance(string& pb);
 
     bool Add(string& key);
     bool Test(string& key);
@@ -96,8 +83,6 @@ public:
     BloomSlice(int entries, double error);
     BloomSlice();
     ~BloomSlice();
-
-    bool InitSlice(string& pb);
 
     bool Add(string& key);
     bool Test(string& key);
