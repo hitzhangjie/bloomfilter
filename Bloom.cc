@@ -163,11 +163,17 @@ bool Bloom::Reset(RESET_TYPE type) {
     }
 }
 
-BloomInstance* Bloom::NewBloomInstance(int entries, int err_mode, int err_deno, int slice_num) {
+bool Bloom::NewBloomInstance(int entries, int err_mode, int err_deno, int slice_num) {
     m_trans_period = TRANSITION_PERIOD_SECONDS;
     
     BloomInstance* instance = new BloomInstance(entries, err_mode, err_deno, slice_num);
+    if (!instance) {
+        fprintf(stderr, "Cannot allocate memory for new BloomInstance\n");
+        return false;
+    }
+
     m_instances.push_back(instance);
+    return true;
 }
 
 //==============================================================================

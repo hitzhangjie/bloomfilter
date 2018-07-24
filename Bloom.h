@@ -34,7 +34,7 @@ public:
     bool Reset(RESET_TYPE type);        // 重置
 
                                         // 容量、错误率调整时新建布隆实例
-    BloomInstance* NewBloomInstance(int entries, int err_mode, int err_deno, int slice_num);
+    bool NewBloomInstance(int entries, int err_mode, int err_deno, int slice_num);
 
 private:
     vector<BloomInstance*> m_instances;     // 多个布隆过滤器实例
