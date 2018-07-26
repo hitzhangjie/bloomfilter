@@ -257,10 +257,15 @@ bool BloomInstance::Add(string& key) {
         } 
     }
 
+    static uint32_t resetCnt = 0;
+    resetCnt++;
+
     if (Reset()) {
+        fprintf(stderr, "BloomInstance Reset succ, happens times: %u\n", resetCnt);
         auto it = m_slices.rbegin();
         return (*it)->Add(key);
     } else {
+        fprintf(stderr, "BloomInstance Reset failed, happens times: %u\n", resetCnt);
         return false;
     }
 }
@@ -275,18 +280,6 @@ bool BloomInstance::Test(string& key) {
     }
 
     return false;
-}
-
-bool BloomInstance::Full() {
-
-    for (auto it = m_slices.begin(); it != m_slices.end(); it++) {
-        BloomSlice* slice = *it;
-
-        if (!slice->Full()) {
-            return false;
-        }
-    }
-    return true;
 }
 
 bool BloomInstance::Reset() {
@@ -357,10 +350,10 @@ bool BloomSlice::Add(string& key) {
     register unsigned int a = murmurhash2(key.c_str(), strlen(key.c_str()), 0x9747b28c);
     register unsigned int b = murmurhash2(key.c_str(), strlen(key.c_str()), a);
 
-    int hits = 0;
-
     register unsigned int x;
     register unsigned int i;
+
+    int hits = 0;
 
     for (i = 0; i < m_hashes; i++) {
         x = (a + i*b) % m_bits;
@@ -386,11 +379,11 @@ bool BloomSlice::testOk(int pos, bool needSet) {
         return false;
     }
 
-    if (m_data[bitset_idx].test(pos % 8)) {
+    if (m_data[bitset_idx].test(pos % 64)) {
         return true;
     } else {
         if (needSet) {
-            m_data[bitset_idx].set(pos % 8);
+            m_data[bitset_idx].set(pos % 64);
         }
         return false;
     }
@@ -429,6 +422,8 @@ bool BloomSlice::Full() {
     for (auto it = m_data.begin(); it != m_data.end(); it++) {
         ones += it->count();
     }
+
+    printf("Slice ones: %d, m_bits: %d\n", ones, m_bits);
 
     if (ones >= m_bits / 2) {
         return true;

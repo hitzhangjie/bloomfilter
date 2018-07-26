@@ -1,13 +1,16 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sstream>
 
 #include "Bloom.h"
+#include "feeds.h"
 
 void BloomSliceTest();
 void BloomInstanceTest();
 void BloomTest();
 void BloomRebuild();
+void BloomPerfTest();
 
 int main(int argc, char ** argv) {
 
@@ -20,8 +23,13 @@ int main(int argc, char ** argv) {
     //printf("Bloom Test:\n");
     //BloomTest();
 
-    printf("Bloom Rebuild:\n");
-    BloomRebuild();
+    //printf("Bloom Rebuild:\n");
+    //BloomRebuild();
+
+    printf("Bloom Perf test:\n");
+    BloomPerfTest();
+
+    return 0;
 }
 
 void BloomSliceTest() {
@@ -170,4 +178,25 @@ void BloomRebuild() {
         printf("hello not existed\n");
     }
 
+}
+
+void BloomPerfTest () {
+    Bloom* b = new Bloom(4000, 1, 1000, 2);
+    string key;
+
+    for (int i=0; i<8000; i++) {
+
+        //stringstream ss;
+        //ss << "feedid_" << i;
+        //key = ss.str();
+        key = feeds[i];
+
+        if(!b->Add(key)) {
+            fprintf(stderr, "Add invalid, key: %s\n", key.c_str());
+        }
+
+        string buf;
+        b->SaveBloom(buf);
+        printf("add key -> %s, buf size -> %d\n", key.c_str(), buf.size());
+    }
 }

@@ -50,7 +50,6 @@ public:
 
     bool Add(string& key);
     bool Test(string& key);
-    bool Full();
 
     int GetEntries() { return m_entries; }
     int GetErrMode() { return m_err_mode; }
