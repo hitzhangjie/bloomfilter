@@ -120,7 +120,7 @@ void BloomRebuild() {
     // test Serialize/De-Serialize
     string buf;
     if (bloom->SaveBloom(buf)) {
-        printf("bloom Serialize success\n");
+        printf("bloom Serialize success, buf size:%d\n", buf.size());
     } else {
         return;
     }

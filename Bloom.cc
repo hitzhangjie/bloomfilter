@@ -19,6 +19,14 @@
 
 //==============================================================================
 // Bloom
+
+/**
+ * // Create a bloom, which will `entries` elements, error ratio
+ * // `err_mode/err_deno`, each bloomInstance with `slice_num` slices.
+ * Bloom* bloom = new Bloom(4000, 1, 1000, 2);
+ * bloom->Add("hello world");
+ * bloom->Test("hello world");
+ */
 Bloom::Bloom(int entries, int err_mode, int err_deno, int slice_num) {
 
     m_trans_period = TRANSITION_PERIOD_SECONDS;
@@ -27,12 +35,30 @@ Bloom::Bloom(int entries, int err_mode, int err_deno, int slice_num) {
     m_instances.push_back(instance);
 }
 
+/**
+ * Bloom() should be used combined with InitBloom(string& pb)
+ */
 Bloom::Bloom() {
 }
 
 Bloom::~Bloom() {
+    for (auto it = m_instances.begin(); it != m_instances.end(); it++) {
+        delete *it;
+    }
 }
 
+/**
+ * // Create and serialize the bloom
+ * Bloom* bloom = new Bloom(4000, 1, 1000, 2);
+ * bloom->Add("hello world");
+ * string buf;
+ * bloom->SaveBloom(&buf);
+ *
+ * // De-Serialize the bloom
+ * Bloom* bloom = new Bloom();
+ * bloom->InitBloom(buf);
+ * bloom->Test("hello world");
+ */
 bool Bloom::InitBloom(string& pb) {
 
     pb_bloom::Bloom pbBloom;
@@ -44,8 +70,14 @@ bool Bloom::InitBloom(string& pb) {
     // Bloom attr
     this->m_trans_period = pbBloom.trans_period();
 
+    for (auto it = m_instances.begin(); it != m_instances.end(); it++) {
+        delete *it;
+    }
+    this->m_instances.clear();
+
     // rebuild BloomInstance
     for (auto it = pbBloom.instances().begin(); it != pbBloom.instances().end(); it++) {
+
 
         auto instance = new BloomInstance;
         this->m_instances.push_back(instance);
@@ -78,6 +110,13 @@ bool Bloom::InitBloom(string& pb) {
     return true;
 }
 
+/**
+ * // Serialize bloom
+ * Bloom* bloom = new Bloom(4000, 1, 1000, 2);
+ * bloom->Add("hello world");
+ * string buf;
+ * bloom->SaveBloom(buf);
+ */
 bool Bloom::SaveBloom(string &buf) {
 
     pb_bloom::Bloom pbBloom;
@@ -178,6 +217,10 @@ bool Bloom::NewBloomInstance(int entries, int err_mode, int err_deno, int slice_
 
 //==============================================================================
 // BloomInstance
+
+/**
+ * Create a BloomInstance, this should only be called by Bloom logic.
+ */
 BloomInstance::BloomInstance(int entries, int err_mode, int err_deno, int slice_num) 
     : m_entries(entries), m_err_mode(err_mode), m_err_deno(err_deno), m_slice_num(slice_num) {
 
@@ -253,13 +296,24 @@ bool BloomInstance::Reset() {
         return false;
     }
 
+    // method 1
+    /*
+    auto ptr = *(m_slices.begin());
     m_slices.erase(m_slices.begin());
+    delete ptr;
 
     double avg_entries = m_entries / m_slice_num;
     double avg_error = ((double)m_err_mode / (double)m_err_deno) / m_slice_num;
 
     BloomSlice* slice = new BloomSlice(avg_entries, avg_error);
     m_slices.push_back(slice);
+    */
+
+    // method 2
+    auto ptr = *(m_slices.begin());
+    m_slices.erase(m_slices.begin());
+    m_slices.push_back(ptr);
+    ptr->Reset();
     
     return true;
 }
@@ -293,8 +347,7 @@ BloomSlice::BloomSlice(int entries, double error) {
     m_create_time = time(NULL);
 }
 
-BloomSlice::BloomSlice() {
-}
+BloomSlice::BloomSlice() {}
 
 BloomSlice::~BloomSlice() {}
 
@@ -384,3 +437,8 @@ bool BloomSlice::Full() {
     return false;
 }
 
+void BloomSlice::Reset() {
+    for (auto it = m_data.begin(); it != m_data.end(); it++) {
+        *it = 0;
+    }
+}

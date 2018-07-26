@@ -102,6 +102,8 @@ public:
     void SetBits(int bits) { m_bits = bits; }
     void SetHashes(int hashes) { m_hashes = hashes; }
 
+    void Reset();
+
 private:
     bool testOk(int pos, bool needSet = false);
 
@@ -112,7 +114,6 @@ private:
     int m_bits;
     int m_hashes;
 };
-
 
 #endif
 
