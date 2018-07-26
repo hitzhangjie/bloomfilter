@@ -355,7 +355,7 @@ bool BloomSlice::Add(string& key) {
 
     int hits = 0;
 
-    for (i = 0; i < m_hashes; i++) {
+    for (i = 0; i < (unsigned int)m_hashes; i++) {
         x = (a + i*b) % m_bits;
         if (testOk(x, true)) {
             hits++; 
@@ -400,7 +400,7 @@ bool BloomSlice::Test(string& key) {
     register unsigned int x;
     register unsigned int i;
 
-    for (i = 0; i < m_hashes; i++) {
+    for (i = 0; i < (unsigned int)m_hashes; i++) {
         x = (a + i*b) % m_bits;
         //printf("hash:%d, bit pos: %d\n", i, x);
         if (testOk(x)) {
