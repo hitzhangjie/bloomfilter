@@ -22,7 +22,7 @@ enum RESET_TYPE {
 // Bloom
 class Bloom {
 public:
-    Bloom(int entries, int err_mode, int err_deno, int slice_num = 2);
+    Bloom(int entries, int err_mode, int err_deno, int slice_num = 2, bool reset = true);
     Bloom();
     ~Bloom();
 
@@ -34,7 +34,7 @@ public:
     bool Reset(RESET_TYPE type);        // 重置
 
                                         // 容量、错误率调整时新建布隆实例
-    bool NewBloomInstance(int entries, int err_mode, int err_deno, int slice_num);
+    bool NewBloomInstance(int entries, int err_mode, int err_deno, int slice_num, bool reset = true);
 
 private:
     vector<BloomInstance*> m_instances;     // 多个布隆过滤器实例
@@ -44,7 +44,7 @@ private:
 // BloomInstance
 class BloomInstance {
 public:
-    BloomInstance(int entries, int err_mode, int err_deno, int slice_num = 2);
+    BloomInstance(int entries, int err_mode, int err_deno, int slice_num = 2, bool reset = true);
     BloomInstance();
     ~BloomInstance();
 
@@ -76,6 +76,7 @@ private:
     vector<BloomSlice*> m_slices;   // 每块slice错误率为(m_err_mode/m_err_deno) * (1/m_slice_num)
                                     // 每块slice各存储(m_entries / m_slice_num)
     uint32_t m_create_time;
+    bool m_reset;
 };
 
 // BloomSlice

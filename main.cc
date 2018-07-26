@@ -181,9 +181,12 @@ void BloomRebuild() {
 }
 
 void BloomPerfTest () {
-    Bloom* b = new Bloom(4000, 1, 1000, 2);
+    //Bloom* b = new Bloom(4000, 1, 1000, 2);
+    Bloom* b = new Bloom(4000, 1, 1000);
+
     string key;
 
+    int err = 0;
     for (int i=0; i<8000; i++) {
 
         //stringstream ss;
@@ -192,7 +195,8 @@ void BloomPerfTest () {
         key = feeds[i];
 
         if(!b->Add(key)) {
-            fprintf(stderr, "Add invalid, key: %s\n", key.c_str());
+            err ++;
+            printf("Add invalid, key: %s, i:%d, error: %f\n", key.c_str(), i, (double)err/(double)i);
         }
 
         string buf;

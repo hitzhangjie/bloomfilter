@@ -27,11 +27,11 @@
  * bloom->Add("hello world");
  * bloom->Test("hello world");
  */
-Bloom::Bloom(int entries, int err_mode, int err_deno, int slice_num) {
+Bloom::Bloom(int entries, int err_mode, int err_deno, int slice_num, bool reset) {
 
     m_trans_period = TRANSITION_PERIOD_SECONDS;
 
-    BloomInstance* instance = new BloomInstance(entries, err_mode, err_deno, slice_num);
+    BloomInstance* instance = new BloomInstance(entries, err_mode, err_deno, slice_num, reset);
     m_instances.push_back(instance);
 }
 
@@ -202,10 +202,10 @@ bool Bloom::Reset(RESET_TYPE type) {
     }
 }
 
-bool Bloom::NewBloomInstance(int entries, int err_mode, int err_deno, int slice_num) {
+bool Bloom::NewBloomInstance(int entries, int err_mode, int err_deno, int slice_num, bool reset) {
     m_trans_period = TRANSITION_PERIOD_SECONDS;
     
-    BloomInstance* instance = new BloomInstance(entries, err_mode, err_deno, slice_num);
+    BloomInstance* instance = new BloomInstance(entries, err_mode, err_deno, slice_num, reset);
     if (!instance) {
         fprintf(stderr, "Cannot allocate memory for new BloomInstance\n");
         return false;
@@ -221,8 +221,8 @@ bool Bloom::NewBloomInstance(int entries, int err_mode, int err_deno, int slice_
 /**
  * Create a BloomInstance, this should only be called by Bloom logic.
  */
-BloomInstance::BloomInstance(int entries, int err_mode, int err_deno, int slice_num) 
-    : m_entries(entries), m_err_mode(err_mode), m_err_deno(err_deno), m_slice_num(slice_num) {
+BloomInstance::BloomInstance(int entries, int err_mode, int err_deno, int slice_num, bool reset) 
+    : m_entries(entries), m_err_mode(err_mode), m_err_deno(err_deno), m_slice_num(slice_num), m_reset(reset) {
 
     double avg_entries = entries / slice_num;
     double avg_error = ((double)err_mode / (double)err_deno) / m_slice_num;
@@ -257,16 +257,28 @@ bool BloomInstance::Add(string& key) {
         } 
     }
 
-    static uint32_t resetCnt = 0;
-    resetCnt++;
+    return false;
 
-    if (Reset()) {
-        fprintf(stderr, "BloomInstance Reset succ, happens times: %u\n", resetCnt);
-        auto it = m_slices.rbegin();
-        return (*it)->Add(key);
-    } else {
-        fprintf(stderr, "BloomInstance Reset failed, happens times: %u\n", resetCnt);
-        return false;
+    // If m_reset is true, automatically reset when detecting all slices are
+    // full, so the error ratio will always be lower than we specified. The
+    // cost is we lost one slice's history data.
+    //
+    // If you care about history data, you can create a Bloom with argument
+    // Bloom(..., false) and call Bloom::Reset() manully to reset the slice
+    // data.
+
+    if (m_reset) {
+        static uint32_t resetCnt = 0;
+        resetCnt++;
+    
+        if (Reset()) {
+            printf("BloomInstance Reset succ, happens times: %u\n", resetCnt);
+            auto it = m_slices.rbegin();
+            return (*it)->Add(key);
+        } else {
+            printf("BloomInstance Reset failed, happens times: %u\n", resetCnt);
+            return false;
+        }
     }
 }
 
