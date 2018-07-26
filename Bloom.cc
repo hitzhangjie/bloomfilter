@@ -87,6 +87,7 @@ bool Bloom::InitBloom(string& pb) {
         instance->SetErrDeno(it->err_deno());
         instance->SetSliceNum(it->slices_size());
         instance->SetCreateTime(it->create_time());
+        instance->SetReset(it->reset());
 
         // rebuild BloomSlice
         for (auto itSlice = it->slices().begin(); itSlice != it->slices().end(); itSlice++) {
@@ -135,6 +136,7 @@ bool Bloom::SaveBloom(string &buf) {
         pbInstance->set_err_deno((*it)->GetErrDeno());
         pbInstance->set_slice_num((*it)->GetSliceNum());
         pbInstance->set_create_time((*it)->GetCreateTime());
+        pbInstance->set_reset((*it)->GetReset());
 
         // BloomSlice data
         vector<BloomSlice*> slices = (*it)->GetSlices();

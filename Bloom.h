@@ -56,6 +56,7 @@ public:
     int GetErrDeno() { return m_err_deno; }
     int GetSliceNum() { return m_slice_num; }
     int GetCreateTime() { return m_create_time; }
+    bool GetReset() { return m_reset; }
     vector<BloomSlice*> GetSlices() { return m_slices; }
 
     void SetEntries(int entries) { m_entries = entries; }
@@ -63,6 +64,7 @@ public:
     void SetErrDeno(int err_deno) { m_err_deno = err_deno; }
     void SetSliceNum(int slice_num) { m_slice_num = slice_num; }
     void SetCreateTime(uint32_t create_time) { m_create_time = create_time; }
+    bool SetReset(bool reset) { m_reset = reset; }
     void AddSlice(BloomSlice* slice) { if (slice) m_slices.push_back(slice); }
 
     bool Reset();

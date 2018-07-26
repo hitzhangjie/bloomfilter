@@ -56,13 +56,14 @@ void protobuf_AssignDesc_bloom_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Bloom));
   BloomInstance_descriptor_ = file->message_type(1);
-  static const int BloomInstance_offsets_[6] = {
+  static const int BloomInstance_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BloomInstance, entries_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BloomInstance, err_mode_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BloomInstance, err_deno_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BloomInstance, slice_num_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BloomInstance, slices_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BloomInstance, create_time_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BloomInstance, reset_),
   };
   BloomInstance_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -134,13 +135,14 @@ void protobuf_AddDesc_bloom_2eproto() {
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
     "\n\013bloom.proto\022\010pb_bloom\"I\n\005Bloom\022*\n\tinst"
     "ances\030\001 \003(\0132\027.pb_bloom.BloomInstance\022\024\n\014"
-    "trans_period\030\002 \001(\r\"\222\001\n\rBloomInstance\022\017\n\007"
+    "trans_period\030\002 \001(\r\"\241\001\n\rBloomInstance\022\017\n\007"
     "entries\030\001 \001(\r\022\020\n\010err_mode\030\002 \001(\r\022\020\n\010err_d"
     "eno\030\003 \001(\r\022\021\n\tslice_num\030\004 \001(\r\022$\n\006slices\030\005"
     " \003(\0132\024.pb_bloom.BloomSlice\022\023\n\013create_tim"
-    "e\030\006 \001(\r\"b\n\nBloomSlice\022\023\n\013create_time\030\001 \001"
-    "(\r\022\023\n\013access_time\030\002 \001(\r\022\014\n\004data\030\003 \003(\004\022\014\n"
-    "\004bits\030\004 \001(\r\022\016\n\006hashes\030\005 \001(\r", 347);
+    "e\030\006 \001(\r\022\r\n\005reset\030\007 \001(\010\"b\n\nBloomSlice\022\023\n\013"
+    "create_time\030\001 \001(\r\022\023\n\013access_time\030\002 \001(\r\022\014"
+    "\n\004data\030\003 \003(\004\022\014\n\004bits\030\004 \001(\r\022\016\n\006hashes\030\005 \001"
+    "(\r", 362);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "bloom.proto", &protobuf_RegisterTypes);
   Bloom::default_instance_ = new Bloom();
@@ -417,6 +419,7 @@ const int BloomInstance::kErrDenoFieldNumber;
 const int BloomInstance::kSliceNumFieldNumber;
 const int BloomInstance::kSlicesFieldNumber;
 const int BloomInstance::kCreateTimeFieldNumber;
+const int BloomInstance::kResetFieldNumber;
 #endif  // !_MSC_VER
 
 BloomInstance::BloomInstance()
@@ -440,6 +443,7 @@ void BloomInstance::SharedCtor() {
   err_deno_ = 0u;
   slice_num_ = 0u;
   create_time_ = 0u;
+  reset_ = false;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -480,6 +484,7 @@ void BloomInstance::Clear() {
     err_deno_ = 0u;
     slice_num_ = 0u;
     create_time_ = 0u;
+    reset_ = false;
   }
   slices_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -582,6 +587,22 @@ bool BloomInstance::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(56)) goto parse_reset;
+        break;
+      }
+
+      // optional bool reset = 7;
+      case 7: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_reset:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &reset_)));
+          set_has_reset();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -635,6 +656,11 @@ void BloomInstance::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(6, this->create_time(), output);
   }
 
+  // optional bool reset = 7;
+  if (has_reset()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(7, this->reset(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -673,6 +699,11 @@ void BloomInstance::SerializeWithCachedSizes(
   // optional uint32 create_time = 6;
   if (has_create_time()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(6, this->create_time(), target);
+  }
+
+  // optional bool reset = 7;
+  if (has_reset()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(7, this->reset(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -719,6 +750,11 @@ int BloomInstance::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->create_time());
+    }
+
+    // optional bool reset = 7;
+    if (has_reset()) {
+      total_size += 1 + 1;
     }
 
   }
@@ -772,6 +808,9 @@ void BloomInstance::MergeFrom(const BloomInstance& from) {
     if (from.has_create_time()) {
       set_create_time(from.create_time());
     }
+    if (from.has_reset()) {
+      set_reset(from.reset());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -801,6 +840,7 @@ void BloomInstance::Swap(BloomInstance* other) {
     std::swap(slice_num_, other->slice_num_);
     slices_.Swap(&other->slices_);
     std::swap(create_time_, other->create_time_);
+    std::swap(reset_, other->reset_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

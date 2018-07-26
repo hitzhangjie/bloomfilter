@@ -235,6 +235,13 @@ class BloomInstance : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 create_time() const;
   inline void set_create_time(::google::protobuf::uint32 value);
 
+  // optional bool reset = 7;
+  inline bool has_reset() const;
+  inline void clear_reset();
+  static const int kResetFieldNumber = 7;
+  inline bool reset() const;
+  inline void set_reset(bool value);
+
   // @@protoc_insertion_point(class_scope:pb_bloom.BloomInstance)
  private:
   inline void set_has_entries();
@@ -247,6 +254,8 @@ class BloomInstance : public ::google::protobuf::Message {
   inline void clear_has_slice_num();
   inline void set_has_create_time();
   inline void clear_has_create_time();
+  inline void set_has_reset();
+  inline void clear_has_reset();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -256,9 +265,10 @@ class BloomInstance : public ::google::protobuf::Message {
   ::google::protobuf::uint32 slice_num_;
   ::google::protobuf::RepeatedPtrField< ::pb_bloom::BloomSlice > slices_;
   ::google::protobuf::uint32 create_time_;
+  bool reset_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   friend void  protobuf_AddDesc_bloom_2eproto();
   friend void protobuf_AssignDesc_bloom_2eproto();
@@ -583,6 +593,28 @@ inline ::google::protobuf::uint32 BloomInstance::create_time() const {
 inline void BloomInstance::set_create_time(::google::protobuf::uint32 value) {
   set_has_create_time();
   create_time_ = value;
+}
+
+// optional bool reset = 7;
+inline bool BloomInstance::has_reset() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void BloomInstance::set_has_reset() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void BloomInstance::clear_has_reset() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void BloomInstance::clear_reset() {
+  reset_ = false;
+  clear_has_reset();
+}
+inline bool BloomInstance::reset() const {
+  return reset_;
+}
+inline void BloomInstance::set_reset(bool value) {
+  set_has_reset();
+  reset_ = value;
 }
 
 // -------------------------------------------------------------------

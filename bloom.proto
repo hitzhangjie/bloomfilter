@@ -13,6 +13,7 @@ message BloomInstance {
     optional uint32 slice_num = 4;
     repeated BloomSlice slices = 5;
     optional uint32 create_time = 6;
+    optional bool   reset = 7;
 }
 
 message BloomSlice {
