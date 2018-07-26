@@ -423,7 +423,7 @@ bool BloomSlice::Full() {
         ones += it->count();
     }
 
-    printf("Slice ones: %d, m_bits: %d\n", ones, m_bits);
+    //printf("Slice ones: %d, m_bits: %d\n", ones, m_bits);
 
     if (ones >= m_bits / 2) {
         return true;
